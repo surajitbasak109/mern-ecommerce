@@ -1,0 +1,14 @@
+{
+  "ignore": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "node_modules",
+    "client",
+    "build",
+    "dist"
+  ],
+  "verbose": false,
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
