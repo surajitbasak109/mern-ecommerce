@@ -1,14 +1,12 @@
 import chalk from 'chalk';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
 import helmet from 'helmet';
 import path from 'path';
 
 import keys from './config/keys.js';
 import routes from './routes/index.js';
-
-dotenv.config();
+import { setupDB } from './utils/db.js';
 
 const { port } = keys;
 const app = express();
@@ -24,9 +22,9 @@ app.use(
 app.use(cors());
 app.use(express.static(path.resolve(path.dirname('../dist'))));
 
-app.use(routes);
+setupDB();
 
-console.log('process.env.NODE_ENV', process.env.NODE_ENV);
+app.use(routes);
 
 app.listen(port, () => {
   console.log(

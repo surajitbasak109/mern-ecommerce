@@ -4,9 +4,9 @@ import apiRoutes from './api/index.js';
 import keys from '../config/keys.js';
 
 const router = express.Router();
-const { apiUrl } = keys.app;
+const { apiURL } = keys.app;
 
-const api = `/${apiUrl}`;
+const api = `/${apiURL}`;
 
 // api routes
 router.use(api, apiRoutes);

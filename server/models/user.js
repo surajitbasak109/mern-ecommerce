@@ -8,7 +8,7 @@ const { Schema } = Mongoose;
 const UserSchema = new Schema({
   email: {
     type: String,
-    required: () => {
+    required() {
       return this.provider !== 'email' ? false : true;
     },
   },
