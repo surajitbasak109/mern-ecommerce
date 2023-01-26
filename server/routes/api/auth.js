@@ -183,7 +183,9 @@ authRouter.post('/forgot', async (req, res) => {
 
     const date = new Date();
     existingUser.resetPasswordToken = resetToken;
-    existingUser.resetPasswordExpires = new Date(new Date(date).setHours(date.getHours() +  2));
+    existingUser.resetPasswordExpires = new Date(
+      new Date(date).setHours(date.getHours() + 2)
+    );
 
     existingUser.save();
 
@@ -250,6 +252,61 @@ authRouter.post('/reset/:token', async (req, res) => {
       error: 'Your request could not be processed. Please try again.',
     });
   }
+});
+
+authRouter.post('/reset', auth, async (req, res) => {
+  try {
+    const { password, newPassword, confirmPassword } = req.body;
+    const email = req.user.email;
+
+    if (!email) {
+      return res.status(401).send('Unauthenticated');
+    }
+
+    if (!password) {
+      return res
+        .status(422)
+        .json({ error: 'You must enter your old a password' });
+    }
+
+    if (!newPassword || !confirmPassword) {
+      return res
+        .status(422)
+        .json({ error: 'You must enter your new and confirm password' });
+    }
+
+    if (newPassword != confirmPassword) {
+      return res
+        .status(422)
+        .json({ error: 'New password and confirm password should match' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (!existingUser) {
+      return res.status(400).json({ error: 'User not found!' });
+    }
+
+    const isMatch = await bcrypt.compare(password, existingUser.password);
+
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ error: 'Please enter your correct old password' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(newPassword, salt);
+    existingUser.password = hash;
+    existingUser.save();
+
+    await mailgun.sendEmail(existingUser.email, 'reset-confirmation');
+
+    return res.json({
+      success: true,
+      message:
+        'Password changed successfully. Please login with your new password.',
+    });
+  } catch (error) {}
 });
 
 export default authRouter;
